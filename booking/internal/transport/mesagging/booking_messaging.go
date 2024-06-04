@@ -31,13 +31,13 @@ func NewBookingMessaging(rabbitMQUrl string) (*BookingMessaging, error) {
 
 func (m *BookingMessaging) PublishBookingCreated(booking *model.Booking) error {
 	err := m.channel.ExchangeDeclare(
-		"booking_exchange", // exchange name
-		"topic",            // exchange type
-		true,               // durable
-		false,              // auto-deleted
-		false,              // internal
-		false,              // no-wait
-		nil,                // arguments
+		"booking_exchange",
+		"topic",
+		true,
+		false,
+		false,
+		false,
+		nil,
 	)
 	if err != nil {
 		return err

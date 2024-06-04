@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  clientmanage:
+    build:
+      context: ./clientManage
+      dockerfile: Dockerfile
+    environment:
+      - PORT=4000
+      - ENV=development
+      - DB_URL=postgres://user:pass@clientdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    ports:
+      - "4000:4000"
+    depends_on:
+      - rabbitmq
+      - clientdb
+
+  roommanage:
+    build:
+      context: ./roomManage
+      dockerfile: Dockerfile
+    environment:
+      - PORT=4001
+      - ENV=development
+      - DB_URL=postgres://user:pass@roomdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    ports:
+      - "4001:4001"
+    depends_on:
+      - rabbitmq
+      - roomdb
+
+  booking:
+    build:
+      context: ./booking
+      dockerfile: Dockerfile
+    environment:
+      - PORT=4002
+      - ENV=development
+      - DB_URL=postgres://user:pass@bookingdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    ports:
+      - "4002:4002"
+    depends_on:
+      - rabbitmq
+      - bookingdb
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  clientdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: clientdb
+    ports:
+      - "5432:5432"
+
+  roomdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: roomdb
+    ports:
+      - "5433:5432"
+
+  bookingdb:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: bookingdb
+    ports:
+      - "5434:5432"

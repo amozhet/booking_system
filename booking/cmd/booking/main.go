@@ -5,6 +5,7 @@ import (
 	"booking/internal/repository"
 	"booking/internal/service"
 	"booking/internal/transport/http/handler"
+	"booking/internal/transport/mesagging"
 	"booking/pkg/database"
 	"github.com/gorilla/mux"
 	"log"
@@ -22,7 +23,13 @@ func main() {
 	}
 
 	bookingRepo := repository.NewBookingRepository(db)
-	bookingService := service.NewBookingService(bookingRepo)
+	bookingMessaging, err := messaging.NewBookingMessaging(cfg.RabbitMQUrl)
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	}
+	defer bookingMessaging.Close()
+
+	bookingService := service.NewBookingService(bookingRepo, bookingMessaging)
 	bookingHandler := handler.NewBookingHandler(bookingService)
 
 	r := mux.NewRouter()

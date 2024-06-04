@@ -3,15 +3,17 @@ package service
 import (
 	"booking/internal/domain/model"
 	"booking/internal/repository"
+	"booking/internal/transport/mesagging"
 	"log"
 )
 
 type BookingService struct {
-	repo *repository.BookingRepository
+	repo      *repository.BookingRepository
+	messaging *messaging.BookingMessaging
 }
 
-func NewBookingService(repo *repository.BookingRepository) *BookingService {
-	return &BookingService{repo: repo}
+func NewBookingService(repo *repository.BookingRepository, messaging *messaging.BookingMessaging) *BookingService {
+	return &BookingService{repo: repo, messaging: messaging}
 }
 
 func (s *BookingService) CreateBooking(booking *model.Booking) error {
@@ -20,21 +22,12 @@ func (s *BookingService) CreateBooking(booking *model.Booking) error {
 		log.Printf("Error creating booking: %v", err)
 		return err
 	}
+
+	err = s.messaging.PublishBookingCreated(booking)
+	if err != nil {
+		log.Printf("Error publishing booking created message: %v", err)
+		return err
+	}
+
 	return nil
-}
-
-func (s *BookingService) GetBookingByID(id int64) (*model.Booking, error) {
-	return s.repo.GetBookingByID(id)
-}
-
-func (s *BookingService) UpdateBooking(booking *model.Booking) error {
-	return s.repo.UpdateBooking(booking)
-}
-
-func (s *BookingService) DeleteBooking(id int64) error {
-	return s.repo.DeleteBooking(id)
-}
-
-func (s *BookingService) ListBookings(offset, limit int, filters map[string]interface{}, sortBy, sortOrder string) ([]*model.Booking, error) {
-	return s.repo.ListBookings(offset, limit, filters, sortBy, sortOrder)
 }

@@ -8,12 +8,15 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type BookingMessaging struct {
+type BookingMessaging interface {
+	PublishBookingCreated(booking *model.Booking) error
+}
+type BookingMessagingImpl struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 }
 
-func NewBookingMessaging(rabbitMQUrl string) (*BookingMessaging, error) {
+func NewBookingMessaging(rabbitMQUrl string) (BookingMessaging, error) {
 	conn, err := amqp.Dial(rabbitMQUrl)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
@@ -26,10 +29,10 @@ func NewBookingMessaging(rabbitMQUrl string) (*BookingMessaging, error) {
 		return nil, err
 	}
 
-	return &BookingMessaging{connection: conn, channel: ch}, nil
+	return &BookingMessagingImpl{connection: conn, channel: ch}, nil
 }
 
-func (m *BookingMessaging) PublishBookingCreated(booking *model.Booking) error {
+func (m *BookingMessagingImpl) PublishBookingCreated(booking *model.Booking) error {
 	err := m.channel.ExchangeDeclare(
 		"booking_exchange", // exchange name
 		"topic",            // exchange type
@@ -67,7 +70,7 @@ func (m *BookingMessaging) PublishBookingCreated(booking *model.Booking) error {
 	return nil
 }
 
-func (m *BookingMessaging) Close() {
+func (m *BookingMessagingImpl) Close() {
 	m.channel.Close()
 	m.connection.Close()
 }

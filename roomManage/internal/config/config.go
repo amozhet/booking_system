@@ -1,31 +1,25 @@
-package app
+package config
 
 import (
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port        string
-	Env         string
-	DBUrl       string
-	RabbitMQUrl string
+	DBUrl string
 }
 
 func LoadConfig() *Config {
-	return &Config{
-		Port:        getEnv("PORT", "4001"),
-		Env:         getEnv("ENV", "development"),
-		DBUrl:       getEnv("DB_URL", "postgres://user:pass@localhost/roomdb"),
-		RabbitMQUrl: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
 	}
-}
 
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		log.Printf("Warning: %s environment variable not set. Using default value: %s", key, defaultValue)
-		return defaultValue
+	config := &Config{
+		DBUrl: os.Getenv("DB_URL"),
 	}
-	return value
+
+	return config
 }

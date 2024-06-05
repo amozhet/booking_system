@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package room;
+
+service RoomService {
+  rpc GetAllRooms (Empty) returns (RoomList);
+  rpc GetRoomByID (RoomID) returns (Room);
+  rpc CreateRoom (Room) returns (Room);
+  rpc UpdateRoom (Room) returns (Room);
+  rpc DeleteRoom (RoomID) returns (Empty);
+}
+
+message Room {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  bool available = 4;
+}
+
+message RoomID {
+  int32 id = 1;
+}
+
+message RoomList {
+  repeated Room rooms = 1;
+}
+
+message Empty {}

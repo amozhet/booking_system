@@ -10,22 +10,22 @@ import (
 
 type BookingMessaging interface {
 	PublishBookingCreated(booking *model.Booking) error
+	Close() error
 }
+
 type BookingMessagingImpl struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 }
 
-func NewBookingMessaging(rabbitMQUrl string) (BookingMessaging, error) {
+func NewBookingMessaging(rabbitMQUrl string) (*BookingMessagingImpl, error) {
 	conn, err := amqp.Dial(rabbitMQUrl)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 		return nil, err
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to open a channel: %v", err)
 		return nil, err
 	}
 
@@ -34,13 +34,13 @@ func NewBookingMessaging(rabbitMQUrl string) (BookingMessaging, error) {
 
 func (m *BookingMessagingImpl) PublishBookingCreated(booking *model.Booking) error {
 	err := m.channel.ExchangeDeclare(
-		"booking_exchange", // exchange name
-		"topic",            // exchange type
-		true,               // durable
-		false,              // auto-deleted
-		false,              // internal
-		false,              // no-wait
-		nil,                // arguments
+		"booking_exchange",
+		"topic",
+		true,
+		false,
+		false,
+		false,
+		nil,
 	)
 	if err != nil {
 		return err
@@ -70,7 +70,9 @@ func (m *BookingMessagingImpl) PublishBookingCreated(booking *model.Booking) err
 	return nil
 }
 
-func (m *BookingMessagingImpl) Close() {
-	m.channel.Close()
-	m.connection.Close()
+func (m *BookingMessagingImpl) Close() error {
+	if err := m.channel.Close(); err != nil {
+		return err
+	}
+	return m.connection.Close()
 }

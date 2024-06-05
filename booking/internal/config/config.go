@@ -16,7 +16,7 @@ func LoadConfig() *Config {
 	return &Config{
 		Port:        getEnv("PORT", "4002"),
 		Env:         getEnv("ENV", "development"),
-		DBUrl:       getEnv("DB_URL", "postgres://user:pass@localhost/bookingdb"),
+		DBUrl:       getEnv("DB_URL", "postgres://postgres:12345@localhost/bookingdb"),
 		RabbitMQUrl: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
 	}
 }

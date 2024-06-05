@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package clientManage;
+option go_package = "Booking_system/clientManage/proto;proto";
+
+message Client {
+  int64 id = 1;
+
+  string fname = 4;
+  string sname = 5;
+  string email = 6;
+  string user_role = 7;
+  bool activated = 8;
+  int32 version = 9;
+}
+
+
+
+message CreateClientRequest {
+  Client client = 1;
+}
+
+message CreateClientResponse {
+  Client client = 1;
+}
+
+message GetClientRequest {
+  int64 id = 1;
+}
+
+message GetClientResponse {
+  Client client = 1;
+}
+
+message UpdateClientRequest {
+  Client client = 1;
+}
+
+
+message UpdateClientResponse {
+  Client client = 1;
+}
+
+
+message DeleteClientRequest {
+  int64 id = 1;
+}
+
+
+message DeleteClientResponse {
+  Client client = 1;
+}
+
+message ListClientsRequest {
+  int64 offset = 1;
+  int64 limit = 2;
+  string sort_by = 3;
+  string sort_order = 4;
+  repeated Filter filters = 5;
+}
+
+message Filter {
+  string key = 1;
+  string value = 2;
+}
+message ListClientsResponse {
+  repeated Client clients = 1;
+}
+
+service ClientManagementService {
+  rpc CreateClient(CreateClientRequest) returns (CreateClientResponse);
+  rpc GetClient(GetClientRequest) returns (GetClientResponse);
+  rpc UpdateClient(UpdateClientRequest) returns (UpdateClientResponse);
+  rpc DeleteClient(DeleteClientRequest) returns (DeleteClientResponse);
+  rpc ListClients(ListClientsRequest) returns (ListClientsResponse);
+
+
+}

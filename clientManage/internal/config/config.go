@@ -14,9 +14,11 @@ type Config struct {
 
 func LoadConfig() *Config {
 	return &Config{
-		Port:        getEnv("PORT", "4000"),
-		Env:         getEnv("ENV", "development"),
-		DBUrl:       getEnv("DB_URL", "postgres://user:pass@localhost/clientdb"),
+		Port: getEnv("PORT", "4000"),
+		Env:  getEnv("ENV", "development"),
+		// $env:DSN="postgres://postgres:12345@localhost/clientdb?sslmode=disable"
+		DBUrl: getEnv("DB_URL", "postgres://postgres:12345@localhost/clientdb?sslmode=disable"),
+		// $env:RABBITMQ_URL="amqp://guest:guest@localhost:5672/"
 		RabbitMQUrl: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
 	}
 }

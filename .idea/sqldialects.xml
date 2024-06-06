@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/clientManage/migrations/000001_clients.down.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/clientManage/migrations/000001_clients.up.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/clientManage/migrations/000001_users.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/clientManage/migrations/000001_users.up.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/clientManage/migrations/000002_tokens.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/clientManage/migrations/000002_tokens.up.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/clientManage/migrations/000003_permissions.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/clientManage/migrations/000003_permissions.up.sql" dialect="PostgreSQL" />
   </component>
 </project>

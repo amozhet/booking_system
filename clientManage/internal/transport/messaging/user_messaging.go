@@ -1,24 +1,24 @@
 package messaging
 
 import (
+	"clientManage/internal/data"
 	"encoding/json"
 	"log"
 
-	"clientManage/internal/domain/model"
 	"github.com/streadway/amqp"
 )
 
-type ClientMessaging interface {
-	PublishClientCreated(client *model.Client) error
+type UserMessaging interface {
+	PublishUserCreated(user *data.UserModel) error
 	Close() error
 }
 
-type ClientMessagingImpl struct {
+type UserMessagingImpl struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 }
 
-func NewClientMessaging(rabbitMQUrl string) (*ClientMessagingImpl, error) {
+func NewUserMessaging(rabbitMQUrl string) (*UserMessagingImpl, error) {
 	conn, err := amqp.Dial(rabbitMQUrl)
 	if err != nil {
 		return nil, err
@@ -29,12 +29,12 @@ func NewClientMessaging(rabbitMQUrl string) (*ClientMessagingImpl, error) {
 		return nil, err
 	}
 
-	return &ClientMessagingImpl{connection: conn, channel: ch}, nil
+	return &UserMessagingImpl{connection: conn, channel: ch}, nil
 }
 
-func (m *ClientMessagingImpl) PublishClientCreated(client *model.Client) error {
+func (m *UserMessagingImpl) PublishUserCreated(user *data.UserModel) error {
 	err := m.channel.ExchangeDeclare(
-		"client_exchange",
+		"user_exchange",
 		"topic",
 		true,
 		false,
@@ -46,14 +46,14 @@ func (m *ClientMessagingImpl) PublishClientCreated(client *model.Client) error {
 		return err
 	}
 
-	body, err := json.Marshal(client)
+	body, err := json.Marshal(user)
 	if err != nil {
 		return err
 	}
 
 	err = m.channel.Publish(
-		"client_exchange",
-		"client.created",
+		"user_exchange",
+		"user.created",
 		false,
 		false,
 		amqp.Publishing{
@@ -62,15 +62,15 @@ func (m *ClientMessagingImpl) PublishClientCreated(client *model.Client) error {
 		},
 	)
 	if err != nil {
-		log.Printf("Failed to publish client created message: %v", err)
+		log.Printf("Failed to publish user created message: %v", err)
 		return err
 	}
 
-	log.Printf("Client created message published: %v", client)
+	log.Printf("User created message published: %v", user)
 	return nil
 }
 
-func (m *ClientMessagingImpl) Close() error {
+func (m *UserMessagingImpl) Close() error {
 	if err := m.channel.Close(); err != nil {
 		return err
 	}

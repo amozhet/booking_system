@@ -5,6 +5,7 @@ import (
 	"booking/internal/service"
 	pb "booking/proto"
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -82,16 +83,13 @@ func (s *BookingGRPCServer) UpdateBooking(ctx context.Context, req *pb.UpdateBoo
 	}, nil
 }
 
-/*
-func (s *BookingGRPCServer) DeleteBooking(ctx context.Context, req *pb.DeleteBookingRequest) (*pb.Empty, error) {
+func (s *BookingGRPCServer) DeleteBooking(ctx context.Context, req *pb.DeleteBookingRequest) (*emptypb.Empty, error) {
 	err := s.bookingService.DeleteBooking(req.Id)
 	if err != nil {
 		return nil, err
 	}
-
-	return &pb.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
-*/
 
 func (s *BookingGRPCServer) ListBookings(ctx context.Context, req *pb.ListBookingsRequest) (*pb.ListBookingsResponse, error) {
 	filters := make(map[string]interface{})

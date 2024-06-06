@@ -1,25 +1,49 @@
 package config
 
 import (
+	"github.com/spf13/viper"
 	"log"
-	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	DBUrl string
+	Server   ServerConfig
+	GRPC     GRPCConfig
+	Database DatabaseConfig
+	RabbitMQ RabbitMQConfig
+}
+
+type ServerConfig struct {
+	Port int
+}
+
+type GRPCConfig struct {
+	Port int
+}
+
+type DatabaseConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBName   string
+}
+
+type RabbitMQConfig struct {
+	URL string
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
+	viper.SetConfigFile("config.yaml")
+	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Error reading config file, %s", err)
 	}
 
-	config := &Config{
-		DBUrl: os.Getenv("DB_URL"),
+	var config Config
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		log.Fatalf("Unable to decode into struct, %v", err)
 	}
 
-	return config
+	return &config
 }

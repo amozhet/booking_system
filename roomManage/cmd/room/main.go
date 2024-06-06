@@ -1,13 +1,23 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"roomManage/internal/app"
+	"roomManage/internal/config"
+	"roomManage/pkg/logger"
 )
 
 func main() {
-	a := app.New()
-	log.Fatal(http.ListenAndServe(":8080", a.Router))
+	log := logger.NewLogger()
+	cfg := config.LoadConfig()
+	application := app.NewApp(cfg, log)
+
+	go func() {
+		if err := application.RunHTTPServer(); err != nil {
+			log.Fatalf("Failed to run HTTP server: %v", err)
+		}
+	}()
+
+	if err := application.RunGRPCServer(); err != nil {
+		log.Fatalf("Failed to run gRPC server: %v", err)
+	}
 }

@@ -6,6 +6,8 @@ import (
 	"clientManage/internal/transport/http/auth"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -30,11 +32,14 @@ func (h *ClientHandler) RegisterClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = client.SetPassword(client.PasswordHash)
+	// Hash the plain text password before storing it
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(client.PasswordHash), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Failed to set password", http.StatusInternalServerError)
+		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		log.Printf("Failed to hash password: %v", err)
 		return
 	}
+	client.PasswordHash = string(hashedPassword)
 
 	err = h.service.CreateClient(&client)
 	if err != nil {
@@ -68,11 +73,18 @@ func (h *ClientHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = client.CheckPassword(credentials.Password)
+	// Log retrieved client's email and password hash
+	log.Printf("Retrieved client: Email: %s, PasswordHash: %s", client.Email, client.PasswordHash)
+
+	// Check password
+	err = bcrypt.CompareHashAndPassword([]byte(client.PasswordHash), []byte(credentials.Password))
 	if err != nil {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		http.Error(w, "Incorrect password", http.StatusUnauthorized)
+		log.Printf("Incorrect password: %v", err)
 		return
 	}
+
+	log.Printf("Successful login for client: %s", client.Email)
 
 	token, err := auth.GenerateJWT(client.Email, client.Role)
 	if err != nil {

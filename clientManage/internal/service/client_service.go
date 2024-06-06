@@ -5,7 +5,6 @@ import (
 	"clientManage/internal/repository"
 	"clientManage/internal/transport/messaging"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -18,15 +17,6 @@ func NewClientService(repo repository.ClientRepository, messaging messaging.Clie
 	return &ClientService{repo: repo, messaging: messaging}
 }
 
-// hashPassword hashes a given password using bcrypt
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	if err != nil {
-		return "", err
-	}
-	return string(bytes), nil
-}
-
 func (s *ClientService) CreateClient(client *model.Client) error {
 	existingUser, err := s.repo.GetClientByEmail(client.Email)
 	if err != nil {
@@ -35,12 +25,6 @@ func (s *ClientService) CreateClient(client *model.Client) error {
 	if existingUser != nil {
 		return errors.New("user with this email already exists")
 	}
-
-	hashedPassword, err := hashPassword(client.PasswordHash)
-	if err != nil {
-		return err
-	}
-	client.PasswordHash = hashedPassword
 
 	err = s.repo.CreateClient(client)
 	if err != nil {

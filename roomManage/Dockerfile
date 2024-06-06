@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /roomManage
+RUN go build -o /room
 
 EXPOSE 4001
 

@@ -3,30 +3,32 @@ package repository
 import (
 	"booking/internal/domain/model"
 	"database/sql"
-	"log"
 	"strconv"
 	"strings"
 )
 
-type BookingRepository struct {
+type BookingRepository interface {
+	CreateBooking(booking *model.Booking) error
+	GetBookingByID(id int64) (*model.Booking, error)
+	UpdateBooking(booking *model.Booking) error
+	DeleteBooking(id int64) error
+	ListBookings(offset, limit int, filters map[string]interface{}, sortBy, sortOrder string) ([]*model.Booking, error)
+}
+
+type BookingRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func NewBookingRepository(db *sql.DB) *BookingRepository {
-	return &BookingRepository{DB: db}
+func NewBookingRepository(db *sql.DB) *BookingRepositoryImpl {
+	return &BookingRepositoryImpl{DB: db}
 }
 
-func (r *BookingRepository) CreateBooking(booking *model.Booking) error {
+func (r *BookingRepositoryImpl) CreateBooking(booking *model.Booking) error {
 	query := `INSERT INTO bookings (client_id, room_id, start_date, end_date, status) VALUES ($1, $2, $3, $4, $5) RETURNING id`
-	err := r.DB.QueryRow(query, booking.ClientID, booking.RoomID, booking.StartDate, booking.EndDate, booking.Status).Scan(&booking.ID)
-	if err != nil {
-		log.Printf("Error creating booking: %v", err)
-		return err
-	}
-	return nil
+	return r.DB.QueryRow(query, booking.ClientID, booking.RoomID, booking.StartDate, booking.EndDate, booking.Status).Scan(&booking.ID)
 }
 
-func (r *BookingRepository) GetBookingByID(id int64) (*model.Booking, error) {
+func (r *BookingRepositoryImpl) GetBookingByID(id int64) (*model.Booking, error) {
 	query := `SELECT id, client_id, room_id, start_date, end_date, status FROM bookings WHERE id = $1`
 	var booking model.Booking
 	err := r.DB.QueryRow(query, id).Scan(&booking.ID, &booking.ClientID, &booking.RoomID, &booking.StartDate, &booking.EndDate, &booking.Status)
@@ -34,33 +36,24 @@ func (r *BookingRepository) GetBookingByID(id int64) (*model.Booking, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Printf("Error getting booking by ID: %v", err)
 		return nil, err
 	}
 	return &booking, nil
 }
 
-func (r *BookingRepository) UpdateBooking(booking *model.Booking) error {
+func (r *BookingRepositoryImpl) UpdateBooking(booking *model.Booking) error {
 	query := `UPDATE bookings SET client_id = $1, room_id = $2, start_date = $3, end_date = $4, status = $5 WHERE id = $6`
 	_, err := r.DB.Exec(query, booking.ClientID, booking.RoomID, booking.StartDate, booking.EndDate, booking.Status, booking.ID)
-	if err != nil {
-		log.Printf("Error updating booking: %v", err)
-		return err
-	}
-	return nil
+	return err
 }
 
-func (r *BookingRepository) DeleteBooking(id int64) error {
+func (r *BookingRepositoryImpl) DeleteBooking(id int64) error {
 	query := `DELETE FROM bookings WHERE id = $1`
 	_, err := r.DB.Exec(query, id)
-	if err != nil {
-		log.Printf("Error deleting booking: %v", err)
-		return err
-	}
-	return nil
+	return err
 }
 
-func (r *BookingRepository) ListBookings(offset, limit int, filters map[string]interface{}, sortBy, sortOrder string) ([]*model.Booking, error) {
+func (r *BookingRepositoryImpl) ListBookings(offset, limit int, filters map[string]interface{}, sortBy, sortOrder string) ([]*model.Booking, error) {
 	query := `SELECT id, client_id, room_id, start_date, end_date, status FROM bookings`
 	var whereClauses []string
 	var args []interface{}
@@ -82,7 +75,6 @@ func (r *BookingRepository) ListBookings(offset, limit int, filters map[string]i
 
 	rows, err := r.DB.Query(query, args...)
 	if err != nil {
-		log.Printf("Error listing bookings: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -91,13 +83,11 @@ func (r *BookingRepository) ListBookings(offset, limit int, filters map[string]i
 	for rows.Next() {
 		var booking model.Booking
 		if err := rows.Scan(&booking.ID, &booking.ClientID, &booking.RoomID, &booking.StartDate, &booking.EndDate, &booking.Status); err != nil {
-			log.Printf("Error scanning booking: %v", err)
 			return nil, err
 		}
 		bookings = append(bookings, &booking)
 	}
 	if err := rows.Err(); err != nil {
-		log.Printf("Error with rows in list bookings: %v", err)
 		return nil, err
 	}
 	return bookings, nil

@@ -13,3 +13,8 @@ func (m *BookingMessagingMock) PublishBookingCreated(booking *model.Booking) err
 	args := m.Called(booking)
 	return args.Error(0)
 }
+
+func (m *BookingMessagingMock) Close() error {
+	args := m.Called()
+	return args.Error(0)
+}

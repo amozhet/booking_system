@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+grpc:
+  port: 9090
+
+database:
+  host: localhost
+  port: 5432
+  user: yourusername
+  password: yourpassword
+  dbname: yourdbname
+
+rabbitmq:
+  url: amqp://guest:guest@localhost:5672/

@@ -1,31 +1,49 @@
-package app
+package config
 
 import (
+	"github.com/spf13/viper"
 	"log"
-	"os"
 )
 
 type Config struct {
-	Port        string
-	Env         string
-	DBUrl       string
-	RabbitMQUrl string
+	Server   ServerConfig
+	GRPC     GRPCConfig
+	Database DatabaseConfig
+	RabbitMQ RabbitMQConfig
+}
+
+type ServerConfig struct {
+	Port int
+}
+
+type GRPCConfig struct {
+	Port int
+}
+
+type DatabaseConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBName   string
+}
+
+type RabbitMQConfig struct {
+	URL string
 }
 
 func LoadConfig() *Config {
-	return &Config{
-		Port:        getEnv("PORT", "4001"),
-		Env:         getEnv("ENV", "development"),
-		DBUrl:       getEnv("DB_URL", "postgres://user:pass@localhost/roomdb"),
-		RabbitMQUrl: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
+	viper.SetConfigFile("config.yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error reading config file, %s", err)
 	}
-}
 
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		log.Printf("Warning: %s environment variable not set. Using default value: %s", key, defaultValue)
-		return defaultValue
+	var config Config
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		log.Fatalf("Unable to decode into struct, %v", err)
 	}
-	return value
+
+	return &config
 }

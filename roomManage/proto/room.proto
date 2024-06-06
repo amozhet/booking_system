@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "booking_system/roomManage/proto";
+
+service RoomService {
+  rpc GetRooms (GetRoomsRequest) returns (GetRoomsResponse);
+  rpc GetRoomByID (GetRoomByIDRequest) returns (GetRoomResponse);
+  rpc CreateRoom (CreateRoomRequest) returns (RoomResponse);
+  rpc UpdateRoom (UpdateRoomRequest) returns (RoomResponse);
+  rpc DeleteRoom (DeleteRoomRequest) returns (DeleteRoomResponse);
+}
+
+message Room {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool available = 4;
+}
+
+message GetRoomsRequest {}
+
+message GetRoomsResponse {
+  repeated Room rooms = 1;
+}
+
+message GetRoomByIDRequest {
+  string id = 1;
+}
+
+message GetRoomResponse {
+  Room room = 1;
+}
+
+message CreateRoomRequest {
+  Room room = 1;
+}
+
+message RoomResponse {
+  Room room = 1;
+}
+
+message UpdateRoomRequest {
+  Room room = 1;
+}
+
+message DeleteRoomRequest {
+  string id = 1;
+}
+
+message DeleteRoomResponse {
+  bool success = 1;
+}

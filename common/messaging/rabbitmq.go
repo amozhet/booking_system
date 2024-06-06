@@ -5,10 +5,31 @@ import (
 	"log"
 )
 
-func ConnectRabbitMQ(rabbitMQUrl string) (*amqp.Connection, error) {
-	conn, err := amqp.Dial(rabbitMQUrl)
+type RabbitMQ struct {
+	Conn    *amqp.Connection
+	Channel *amqp.Channel
+}
+
+func NewRabbitMQ(url string) (*RabbitMQ, error) {
+	conn, err := amqp.Dial(url)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		return nil, err
 	}
-	return conn, nil
+	ch, err := conn.Channel()
+	if err != nil {
+		return nil, err
+	}
+	return &RabbitMQ{
+		Conn:    conn,
+		Channel: ch,
+	}, nil
+}
+
+func (r *RabbitMQ) Close() {
+	if err := r.Channel.Close(); err != nil {
+		log.Println("Failed to close RabbitMQ channel:", err)
+	}
+	if err := r.Conn.Close(); err != nil {
+		log.Println("Failed to close RabbitMQ connection:", err)
+	}
 }

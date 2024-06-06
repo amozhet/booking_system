@@ -5,6 +5,12 @@ import (
 	"os"
 )
 
-func NewLogger() *log.Logger {
-	return log.New(os.Stdout, "", log.Ldate|log.Ltime)
+type Logger struct {
+	*log.Logger
+}
+
+func NewLogger() *Logger {
+	return &Logger{
+		Logger: log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile),
+	}
 }
